@@ -19,12 +19,18 @@
     // Ship Details
     const SHIP_SIZE = 30; // Height In Pixels
     const TURN_SPEED = 360; // Turn Speed in Degrees Per Second
+    const SHIP_THRUST = 5; // Acceleration of Ship in Pixels Per Second
     const SHIP = {
         x: canv.width / 2,
         y: canv.height / 2,
         r: SHIP_SIZE / 2,
         a: 90 / 180 * Math.PI, // Convert to Radians
-        rot: 0
+        rot: 0,
+        thrusting: false,
+        thrust: {
+            x: 0,
+            y: 0
+        }
     }
 
       const keyDown = (/** @type {KeyboardEvent} */ ev) => {
@@ -33,6 +39,7 @@
             SHIP.rot = TURN_SPEED / 180 * Math.PI / FPS;
                 break;
             case 38: // Up Arrow  (Thrusts Ship Forward)
+            SHIP.thrusting = true;
                 break;
             case 39: // Right Arrow (Rotates Ship Right)
             SHIP.rot = -TURN_SPEED / 180 * Math.PI / FPS;
@@ -46,6 +53,7 @@
             SHIP.rot = 0;
                 break;
             case 38: // Up Arrow  (Stops Forward Thrust)
+            SHIP.thrusting = false;
                 break;
             case 39: // Right Arrow (Stops Right Rotation)
             SHIP.rot = 0;
@@ -63,6 +71,11 @@
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canv.width, canv.height);
 
+        // Thrusts Ship
+        if (SHIP.thrusting){
+            SHIP.thrust.x += SHIP_THRUST * Math.cos(SHIP.a) / FPS;
+            SHIP.thrust.y -= SHIP_THRUST * Math.sin(SHIP.a) / FPS;
+        }
         // Draws Ship
         ctx.strokeStyle = "white",
         ctx.lineWidth = SHIP_SIZE / 20;
@@ -88,6 +101,8 @@
         // Rotate Ship
         SHIP.a += SHIP.rot;
         // Move Ship
+        SHIP.x += SHIP.thrust.x;
+        SHIP.y += SHIP.thrust.y;
 
         // Center Dot
         ctx.fillStyle = "red";
