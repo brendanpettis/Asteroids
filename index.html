@@ -76,6 +76,38 @@
         if (SHIP.thrusting){
             SHIP.thrust.x += SHIP_THRUST * Math.cos(SHIP.a) / FPS;
             SHIP.thrust.y -= SHIP_THRUST * Math.sin(SHIP.a) / FPS;
+
+            // Draws Thrust
+            ctx.fillStyle = "red";
+            ctx.strokeStyle = "yellow";
+            ctx.lineWidth = SHIP_SIZE / 20;
+            ctx.beginPath();
+            // Nose of Ship
+            ctx.moveTo(
+                SHIP.x - SHIP.r * (2 / 3 * Math.cos(SHIP.a) + 0.5 * Math.sin(SHIP.a)),
+                SHIP.y + SHIP.r * (2 / 3 * Math.sin(SHIP.a) - 0.5 * Math.cos(SHIP.a)),
+            );
+            // Rear Left
+            ctx.lineTo(
+                SHIP.x - SHIP.r * 6 / 3 * Math.cos(SHIP.a),
+                SHIP.y + SHIP.r * 6 / 3 * Math.sin(SHIP.a),
+            );
+            // Rear Right
+            ctx.lineTo(
+                SHIP.x - SHIP.r * (2 / 3 * Math.cos(SHIP.a) - 0.5 * Math.sin(SHIP.a)),
+                SHIP.y + SHIP.r * (2 / 3 * Math.sin(SHIP.a) + 0.5 * Math.cos(SHIP.a)),
+            );
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+
+
+
+
+
+
+
         }else{
             SHIP.thrust.x -= FRICTION * SHIP.thrust.x / FPS;
             SHIP.thrust.y -= FRICTION * SHIP.thrust.y / FPS;
@@ -123,9 +155,10 @@
         }else if (SHIP.y > canv.height + SHIP.r){
             SHIP.y = 0 - SHIP.r;
         }
-        // Center Dot
-        ctx.fillStyle = "red";
-        ctx.fillRect(SHIP.x - 1,SHIP.y - 1, 2, 2);
+       
+       // Center Dot Commented out For Now. Use for Debugging
+       // ctx.fillStyle = "red";
+       // ctx.fillRect(SHIP.x - 1,SHIP.y - 1, 2, 2);
     };
 
     // Game Loop
