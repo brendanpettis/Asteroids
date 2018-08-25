@@ -1,8 +1,12 @@
 /** @type {HTMLCanvasElement} */
 
-// Declarations
+// Canvas Details
+const canv = document.getElementById("gameWindow"); // Game Window
+const ctx = canv.getContext("2d");
 const FPS = 30; // Frames Per Second;
 const FRICTION = 0.7; // Friction Coefficient of Space (0 = No Friction, 1 = Lots)
+
+// Testing Features
 const SHOW_BOUNDING = false; // Show or Hide Collision Bounding
 const SHOW_CENTERDOT = false; // Show or Hide Center Dot
 
@@ -17,16 +21,14 @@ const SHIP_BLINK_DUR = 0.1; // Duration of Ships Blinking During Invisibility
 // Laser Details
 const LASER_MAX = 10; // Max Number of laser beams on screen at once
 const LASER_SPD = 500; // Speed of Lasers
+const LASER_DIST = 0.5; // Max Distance Laser Can Travel as Fraction of Screen
+
 // Astroid Details
 const NUM_ROIDS = 3; // Starting number of astroids
 const ROIDS_SIZE = 100; // Starting size of astroids in Pixels
 const ROIDS_SPD = 50; // Starting Speed in Pixels Per Second
 const ROIDS_VERT = 10; // Average Number of Vertices on Each Asteroid
 const ROIDS_JAG = 0.4; // Jaggedness of Asteroids (0 = none, 1 = Lots)
-
-// Canvas Details
-const canv = document.getElementById("gameWindow"); // Game Window
-const ctx = canv.getContext("2d");
 
 let SHIP = newShip();
 
@@ -51,12 +53,6 @@ function distBetweenPoints(x1, y1, x2, y2) {
 
 function explodeShip() {
     SHIP.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
-   /* ctx.fillStyle = "lime";
-    ctx.strokeStyle = "lime";
-    ctx.beginPath();
-    ctx.arc(SHIP.x, SHIP.y, SHIP.r, 0, Math.PI * 2, false);
-    ctx.fill();
-    ctx.stroke(); */
 }
 
 function createAsteroid(x, y) {
@@ -104,7 +100,8 @@ function shootLaser() {
             x: SHIP.x + 4 / 3 * SHIP.r * Math.cos(SHIP.a),
             y: SHIP.y - 4 / 3 * SHIP.r * Math.sin(SHIP.a),
             xv: LASER_SPD * Math.cos(SHIP.a) / FPS,
-            yv: -LASER_SPD * Math.sin(SHIP.a) / FPS
+            yv: -LASER_SPD * Math.sin(SHIP.a) / FPS,
+            dist: 0
         });
     }
     SHIP.canShoot = false;
@@ -156,8 +153,6 @@ const update = () => {
     // Draws Space
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canv.width, canv.height);
-
-   
 
     // Draws Ship if it isn't exploding
     if(!exploding){   
@@ -331,10 +326,20 @@ const update = () => {
     }
 
     // Moves Lasers
-    for (let i = 0; i < SHIP.lasers.length; i++){
+    for (let i = SHIP.lasers.length - 1; i >= 0; i--){
+        // Checks Distance Travelled    
+        if(SHIP.lasers[i].dist > LASER_DIST * canv.width){
+            SHIP.lasers.splice(i, 1);
+            continue;
+        }
+
+        // Moves the Laser
         SHIP.lasers[i].x += SHIP.lasers[i].xv;
         SHIP.lasers[i].y += SHIP.lasers[i].yv;
 
+        // Calculate Laser Distance Traveled
+        SHIP.lasers[i].dist += Math.sqrt(Math.pow(SHIP.lasers[i].xv,2) + Math.pow(SHIP.lasers[i].yv, 2));
+        
         // Handle Edge of Screen
         // X Coords
         if(SHIP.lasers[i].x < 0){
@@ -383,8 +388,7 @@ const update = () => {
         ctx.arc(SHIP.lasers[i].x,SHIP.lasers[i].y, SHIP_SIZE / 15, 0, Math.PI * 2, false);
         ctx.fill();
     }
-
-};
+};// End update 
 
 // Game Loop
 setInterval(update, 1000 / FPS);
