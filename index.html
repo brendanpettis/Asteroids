@@ -17,13 +17,45 @@
     const FPS = 30; 
     const ctx = canv.getContext("2d");
     // Ship Details
-    const SHIP_SIZE = 30;
+    const SHIP_SIZE = 30; // Height In Pixels
+    const TURN_SPEED = 360; // Turn Speed in Degrees Per Second
     const SHIP = {
         x: canv.width / 2,
         y: canv.height / 2,
         r: SHIP_SIZE / 2,
-        a: 90 / 180 * Math.PI // Convert to Radians
+        a: 90 / 180 * Math.PI, // Convert to Radians
+        rot: 0
     }
+
+      const keyDown = (/** @type {KeyboardEvent} */ ev) => {
+        switch(ev.keyCode){
+            case 37: // Left Arrow (Rotates Ship Left)
+            SHIP.rot = TURN_SPEED / 180 * Math.PI / FPS;
+                break;
+            case 38: // Up Arrow  (Thrusts Ship Forward)
+                break;
+            case 39: // Right Arrow (Rotates Ship Right)
+            SHIP.rot = -TURN_SPEED / 180 * Math.PI / FPS;
+                break;
+        }
+    }
+ 
+    const keyUp = (/** @type {KeyboardEvent} */ ev) => {
+        switch(ev.keyCode){
+            case 37: // Left Arrow (Stops Left Rotation)
+            SHIP.rot = 0;
+                break;
+            case 38: // Up Arrow  (Stops Forward Thrust)
+                break;
+            case 39: // Right Arrow (Stops Right Rotation)
+            SHIP.rot = 0;
+                break;
+        }
+    }
+
+    // Sets Up Event Listeners
+    document.addEventListener("keydown", keyDown);
+    document.addEventListener("keyup", keyUp);
 
      // Sets Up the Game Loop
      const update = () => {
@@ -54,7 +86,7 @@
         ctx.stroke();
 
         // Rotate Ship
-
+        SHIP.a += SHIP.rot;
         // Move Ship
 
         // Center Dot
@@ -62,9 +94,9 @@
         ctx.fillRect(SHIP.x - 1,SHIP.y - 1, 2, 2);
     };
 
+    // Game Loop
     setInterval(update,1000/FPS);
 
-   
     </script>
    
 </body>
