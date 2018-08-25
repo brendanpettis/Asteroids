@@ -7,6 +7,7 @@ const FPS = 30; // Frames Per Second;
 const FRICTION = 0.6; // Friction Coefficient of Space (0 = No Friction, 1 = Lots)
 const TEXT_FADE_TIME = 2.5; // Text Fade Time in Seconds
 const TEXT_SIZE = 40; // Text Font Height in Pixels
+const SAVE_KEY_SCORE = "highscore"; // Save Key for Local Storage
 
 // Game Details
 const GAME_LIVES = 3; // Total Game Lives
@@ -78,6 +79,7 @@ function destroyAsteroid(index) {
     // Check High Score
     if(score > highScore){
         highScore = score;
+        localStorage.setItem(SAVE_KEY_SCORE, highScore);
     }
     // Destroys the asteroid completely
     asteroids.splice(index, 1);
@@ -181,8 +183,16 @@ function newGame() {
     level = 1;
     lives = GAME_LIVES;
     score = 0;
-    highScore = 100;
     ship = newShip();
+
+    let scoreStr = localStorage.getItem(SAVE_KEY_SCORE);
+
+    if(scoreStr == null){
+        highScore = 0;
+    }else{
+        highScore = parseInt(scoreStr);
+    }
+
     newLevel();
 }
 
@@ -551,15 +561,15 @@ const update = () => {
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "white";
-    ctx.font = TEXT_SIZE + "px dejavu sans mono";
-    ctx.fillText(score,canv.width - SHIP_SIZE / 2, SHIP_SIZE);
+    ctx.font = (TEXT_SIZE  * 0.9) + "px dejavu sans mono";
+    ctx.fillText(score, canv.width - SHIP_SIZE / 2, SHIP_SIZE);
     
     // Draw High Score
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "white";
     ctx.font = (TEXT_SIZE * 0.75) + "px dejavu sans mono";
-    ctx.fillText(highScore, canv.width / 2, SHIP_SIZE);
+    ctx.fillText("BEST: " + highScore, canv.width / 2, SHIP_SIZE);
 
     // Checks to see if the laser hit anything
     detectLaserHits();
