@@ -1,15 +1,24 @@
 /** @type {HTMLCanvasElement} */
     
     // Declarations
-    const canv = document.getElementById("gameWindow"); // Game Window
     const FPS = 30; // Frames Per Second;
     const FRICTION = 0.7; // Friction Coefficient of Space (0 = No Friction, 1 = Lots)
-    const ctx = canv.getContext("2d");
     
     // Ship Details
     const SHIP_SIZE = 30; // Height In Pixels
     const TURN_SPEED = 360; // Turn Speed in Degrees Per Second
     const SHIP_THRUST = 5; // Acceleration of Ship in Pixels Per Second
+    
+    // Astroid Details
+    const NUM_ROIDS = 3; // Starting number of astroids
+    const ROID_SIZE = 100; // Starting size of astroids in Pixels
+    const ROIDS_SPD = 50; // Starting Speed in Pixels Per Second
+    const ROIDS_VERT = 10; // Average Number of Vertices on Each Asteroid
+
+    // Canvas Details
+    const canv = document.getElementById("gameWindow"); // Game Window
+    const ctx = canv.getContext("2d");
+
     const SHIP = {
         x: canv.width / 2,
         y: canv.height / 2,
@@ -23,7 +32,33 @@
         }
     }
 
-      const keyDown = (/** @type {KeyboardEvent} */ ev) => {
+    let astroids = [];
+    createAsteroidBelt();
+
+    function createAsteroidBelt() {
+        astroids = [];
+        let x, y;
+        for (let i = 0; i < NUM_ROIDS; i++){
+            x = Math.floor(Math.random() * canvas.width);
+            y = Math.floor(Math.random() * canvas.height);
+            astroids.push(createAsteroid);
+        }
+    }
+
+    function createAsteroid(x,y) {
+        let roid = {
+            x: x,
+            y: y,
+            xv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
+            yv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
+            r: ROIDS_SIZE / 2,
+            a: Math.random() * Math.PI * 2,
+            vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
+        };
+
+        return roid;
+    }
+    const keyDown = (/** @type {KeyboardEvent} */ ev) => {
         switch(ev.keyCode){
             case 37: // Left Arrow (Rotates Ship Left)
             SHIP.rot = TURN_SPEED / 180 * Math.PI / FPS;
@@ -116,6 +151,20 @@
         );
         ctx.closePath();
         ctx.stroke();
+        
+        // Draws Asteroids
+        ctx.strokeStyle = "slategrey";
+        ctx.lineWidth = SHIP_SIZE / 20;
+
+        for (roid in asteriods){
+            // Draw a Path
+            
+            // Draw a PolyGon
+
+            // Move Asteroid
+
+            // Handle Edge of Screen
+        }
 
         // Rotates Ship
         SHIP.a += SHIP.rot;
