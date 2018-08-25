@@ -39,10 +39,16 @@
         astroids = [];
         let x, y;
         for (let i = 0; i < NUM_ROIDS; i++){
-            x = Math.floor(Math.random() * canv.width);
-            y = Math.floor(Math.random() * canv.height);
+            do {
+                x = Math.floor(Math.random() * canv.width);
+                y = Math.floor(Math.random() * canv.height);
+            }while(distBetweenPoints(SHIP.x, SHIP.y, x, y) < ROIDS_SIZE * 2 + SHIP.r);
             asteroids.push(createAsteroid(x,y));
         }
+    }
+
+    function distBetweenPoints(x1, y1, x2, y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
     function createAsteroid(x,y) {
