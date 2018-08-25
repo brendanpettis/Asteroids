@@ -40,14 +40,22 @@ const ROIDS_SPD = 50; // Starting Speed in Pixels Per Second
 const ROIDS_VERT = 10; // Average Number of Vertices on Each Asteroid
 const ROIDS_JAG = 0.4; // Jaggedness of Asteroids (0 = none, 1 = Lots)
 
+// Sound Effects
+const SOUND_ON = true; // Turns Sound On or Off
+const MUSIC_ON = true; // Tunrs Music On or Off
+const fxLaser = new Sound("sounds/laser.m4a", 5, 0.5); // Sound for the Laser Firing
+const fxExplode = new Sound("sounds/explode.m4a"); // Sound for the Ship Exploding
+const fxHit = new Sound("sounds/hit.m4a", 5); // Sound for the Laser hitting an Asteroid
+const fxThrust = new Sound("sounds/thrust.m4a"); // Sound for Ship Thruster
+let music = new Music("sounds/music-low.m4a", "sounds/music-high.m4a");
+
 // Game Parameters
-let level, lives, score, highScore, ship, text, textAlpha;
-let asteroids = [];
+let level, lives, score, highScore, ship, text, textAlpha, asteroids;
 
 newGame();
 
 function createAsteroidBelt() {
-    astroids = [];
+    asteroids = [];
     let x, y;
     for (let i = 0; i < NUM_ROIDS + level; i++) {
         do {
@@ -81,6 +89,10 @@ function destroyAsteroid(index) {
         highScore = score;
         localStorage.setItem(SAVE_KEY_SCORE, highScore);
     }
+
+    // Plays Explosion Sound for Hit
+    fxHit.play();
+
     // Destroys the asteroid completely
     asteroids.splice(index, 1);
 
@@ -119,6 +131,7 @@ function drawShip(x,y,a, colour = "white") {
 
 function explodeShip() {
     ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
+    fxExplode.play();
 }
 
 function gameOver() {
@@ -233,8 +246,60 @@ function shootLaser() {
             dist: 0,
             explodeTime: 0
         });
+        fxLaser.play();
     }
     ship.canShoot = false;
+}
+
+function Sound(src, maxStreams = 1, vol = 1.0) {
+    this.streamNum = 0;
+    this.streams = [];
+
+    for(let i = 0; i < maxStreams; i++){
+        this.streams.push(new Audio(src));
+        this.streams[i].volume = vol;
+    }
+
+    this.play = () => {
+        if(SOUND_ON){
+            this.streamNum = (this.streamNum + 1) % maxStreams;
+            this.streams[this.streamNum].play();
+        }
+    }
+
+    this.stop = () => {
+        this.streams[this.streamNum].pause();
+        this.streams[this.streamNum].currentTime = 0;
+    }
+}
+
+function Music(srcLow, srcHigh) {
+    this.soundLow = new Audio(srcLow);
+    this.soundHigh = new Audio(srcHigh);
+    this.low = true;
+    this.tempo = 1.0; // Seconds Per Beat
+    this.beatTime = 0; // Frames left until next beat
+
+    this.play = function() {
+        if(MUSIC_ON){
+
+        if (this.low){
+            this.soundLow.play();
+        }else{
+            this.soundHigh.play();
+        }
+        this.low = !this.low;
+        }
+    }
+    
+    this.tick = function() {
+        if(this.beatTime == 0){
+            this.play();
+            this.beatTime = Math.ceil(this.temp0 * FPS);
+        }else {
+            this.beatTime--;
+        }
+    }
 }
 
 function detectLaserHits() {
@@ -269,6 +334,9 @@ const keyDown = ( /** @type {KeyboardEvent} */ ev) => {
     }
 
     switch (ev.keyCode) { 
+        case 13:
+        permission = true;
+            break;
         case 32: // Space Bar (Shoots Laser)
             shootLaser();
             break;
@@ -312,9 +380,12 @@ document.addEventListener("keyup", keyUp);
 
 // Sets Up the Game Loop
 const update = () => {
+    // Declarations
     let blinkOn = ship.blinkNum % 2 === 0;
     let exploding = ship.explodeTime > 0;
 
+    music.tick();
+    
     // Draws Space
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canv.width, canv.height);
@@ -323,8 +394,12 @@ const update = () => {
     if(!exploding && !ship.dead){   
             // Thrusts Ship
             if (ship.thrusting) {
+                // Plays Thruster Sound
+                fxThrust.play();
+
                 ship.thrust.x += SHIP_THRUST * Math.cos(ship.a) / FPS;
                 ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a) / FPS;
+                
                 if(blinkOn){
                     // Thrust Details
                     ctx.fillStyle = "red";
@@ -354,6 +429,7 @@ const update = () => {
             } else {
                 ship.thrust.x -= FRICTION * ship.thrust.x / FPS;
                 ship.thrust.y -= FRICTION * ship.thrust.y / FPS;
+                fxThrust.stop();
             }
         if(blinkOn){
             drawShip(ship.x, ship.y, ship.a);
@@ -575,5 +651,4 @@ const update = () => {
     detectLaserHits();
 };// End update 
 
-// Game Loop
 setInterval(update, 1000 / FPS);
