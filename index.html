@@ -80,7 +80,7 @@
             SHIP.thrust.x -= FRICTION * SHIP.thrust.x / FPS;
             SHIP.thrust.y -= FRICTION * SHIP.thrust.y / FPS;
         }
-        
+
         // Draws Ship
         ctx.strokeStyle = "white",
         ctx.lineWidth = SHIP_SIZE / 20;
@@ -103,12 +103,26 @@
         ctx.closePath();
         ctx.stroke();
 
-        // Rotate Ship
+        // Rotates Ship
         SHIP.a += SHIP.rot;
-        // Move Ship
+
+        // Moves Ship
         SHIP.x += SHIP.thrust.x;
         SHIP.y += SHIP.thrust.y;
 
+        // Handle Screen Boundaries
+        // X Coordinates
+        if(SHIP.x < 0 - SHIP.r){
+            SHIP.x = canv.width + SHIP.r;
+        }else if (SHIP.x > canv.width + SHIP.r){
+            SHIP.x = 0 - SHIP.r;
+        }
+        // Y Coordinates
+        if(SHIP.y < 0 - SHIP.r){
+            SHIP.y = canv.height + SHIP.r;
+        }else if (SHIP.y > canv.height + SHIP.r){
+            SHIP.y = 0 - SHIP.r;
+        }
         // Center Dot
         ctx.fillStyle = "red";
         ctx.fillRect(SHIP.x - 1,SHIP.y - 1, 2, 2);
