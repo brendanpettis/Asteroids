@@ -7,6 +7,7 @@ const FPS = 30; // Frames Per Second;
 const FRICTION = 0.7; // Friction Coefficient of Space (0 = No Friction, 1 = Lots)
 const TEXT_FADE_TIME = 2.5; // Text Fade Time in Seconds
 const TEXT_SIZE = 40; // Text Font Height in Pixels
+const GAME_LIVES = 3; // Total Game Lives
 
 // Testing Features
 const SHOW_BOUNDING = false; // Show or Hide Collision Bounding
@@ -34,7 +35,7 @@ const ROIDS_VERT = 10; // Average Number of Vertices on Each Asteroid
 const ROIDS_JAG = 0.4; // Jaggedness of Asteroids (0 = none, 1 = Lots)
 
 // Game Parameters
-let level, ship, text, textAlpha;
+let level, lives, ship, text, textAlpha;
 let asteroids = [];
 
 newGame();
@@ -76,6 +77,29 @@ function distBetweenPoints(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
+function drawShip(x,y,a) {
+    ctx.strokeStyle = "white",
+    ctx.lineWidth = SHIP_SIZE / 20;
+    ctx.beginPath();
+    // Nose of Ship
+    ctx.moveTo(
+        x + 4 / 3 * ship.r * Math.cos(a),
+        y - 4 / 3 * ship.r * Math.sin(a),
+    );
+    // Rear Left
+    ctx.lineTo(
+        x - ship.r * (2 / 3 * Math.cos(a) + Math.sin(a)),
+        y + ship.r * (2 / 3 * Math.sin(a) - Math.cos(a)),
+    );
+    // Rear Right
+    ctx.lineTo(
+        x - ship.r * (2 / 3 * Math.cos(a) - Math.sin(a)),
+        y + ship.r * (2 / 3 * Math.sin(a) + Math.cos(a)),
+    );
+    ctx.closePath();
+    ctx.stroke();
+}
+
 function explodeShip() {
     ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
 }
@@ -102,6 +126,7 @@ function createAsteroid(x, y, r) {
 
 function newGame() {
     level = 1;
+    lives = GAME_LIVES;
     ship = newShip();
     newLevel();
 }
@@ -230,26 +255,7 @@ const update = () => {
                 ship.thrust.y -= FRICTION * ship.thrust.y / FPS;
             }
         if(blinkOn){
-            ctx.strokeStyle = "white",
-                ctx.lineWidth = SHIP_SIZE / 20;
-            ctx.beginPath();
-            // Nose of Ship
-            ctx.moveTo(
-                ship.x + 4 / 3 * ship.r * Math.cos(ship.a),
-                ship.y - 4 / 3 * ship.r * Math.sin(ship.a),
-            );
-            // Rear Left
-            ctx.lineTo(
-                ship.x - ship.r * (2 / 3 * Math.cos(ship.a) + Math.sin(ship.a)),
-                ship.y + ship.r * (2 / 3 * Math.sin(ship.a) - Math.cos(ship.a)),
-            );
-            // Rear Right
-            ctx.lineTo(
-                ship.x - ship.r * (2 / 3 * Math.cos(ship.a) - Math.sin(ship.a)),
-                ship.y + ship.r * (2 / 3 * Math.sin(ship.a) + Math.cos(ship.a)),
-            );
-            ctx.closePath();
-            ctx.stroke();
+            drawShip(ship.x, ship.y, ship.a);
         }
         // Handles Blinking
         if (ship.blinkNum > 0){
@@ -348,6 +354,10 @@ const update = () => {
     }else {
         ship.explodeTime--;
         if(ship.explodeTime === 0){
+            lives--;
+            /*if (lives == 0){
+                gameOver();
+            }*/
             ship = newShip();
         }
     }
@@ -464,6 +474,12 @@ const update = () => {
         ctx.fillText(text,canv.width/2, canv.height * 0.75);
         textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);
     }
+
+    // Draw Game Lives
+    for (let i = 0; i < lives; i++){
+        drawShip(SHIP_SIZE + i * SHIP_SIZE * 1.2, SHIP_SIZE, 0.5 * Math.PI);
+    }
+
     // Detect Laser Hits on Asteroids
     let ax,ay,ar,lx,ly;
     for(let i = asteroids.length -1; i >= 0; i--){
