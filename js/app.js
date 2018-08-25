@@ -43,10 +43,26 @@ function createAsteroidBelt() {
             x = Math.floor(Math.random() * canv.width);
             y = Math.floor(Math.random() * canv.height);
         } while (distBetweenPoints(SHIP.x, SHIP.y, x, y) < ROIDS_SIZE * 2 + SHIP.r);
-        asteroids.push(createAsteroid(x, y));
+        asteroids.push(createAsteroid(x, y, Math.ceil(ROIDS_SIZE / 2)));
     }
 }
 
+function destroyAsteroid(index) {
+    let x = asteroids[index].x;
+    let y = asteroids[index].y;
+    let r = asteroids[index].r;
+
+    // Split the asteroid in half if necessary
+    if(r === Math.ceil(ROIDS_SIZE / 2)){
+        asteroids.push(createAsteroid(x,y,Math.ceil(ROIDS_SIZE / 4)));
+        asteroids.push(createAsteroid(x,y,Math.ceil(ROIDS_SIZE / 4)));
+    }else if (r === Math.ceil(ROIDS_SIZE / 4)){
+        asteroids.push(createAsteroid(x,y,Math.ceil(ROIDS_SIZE / 8)));
+        asteroids.push(createAsteroid(x,y,Math.ceil(ROIDS_SIZE / 8))); 
+    }
+
+    asteroids.splice(index, 1);
+}
 function distBetweenPoints(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
@@ -55,13 +71,13 @@ function explodeShip() {
     SHIP.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
 }
 
-function createAsteroid(x, y) {
+function createAsteroid(x, y, r) {
     let roid = {
         x: x,
         y: y,
         xv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
         yv: Math.random() * ROIDS_SPD / FPS * (Math.random() < 0.5 ? 1 : -1),
-        r: ROIDS_SIZE / 2,
+        r: r,
         a: Math.random() * Math.PI * 2,
         vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
         offs: []
@@ -296,6 +312,7 @@ const update = () => {
             for(let i = 0; i < asteroids.length; i++){
                 if(distBetweenPoints(SHIP.x, SHIP.y, asteroids[i].x, asteroids[i].y) < SHIP.r + asteroids[i].r){
                     explodeShip();
+                    destroyAsteroid(i);
                 }
             }
         }
@@ -407,8 +424,9 @@ const update = () => {
                 // Remove Laser
                 SHIP.lasers.splice(j,1);
 
-                // Remove Asteroid
-                asteroids.splice(i,1);
+                // Destroy Asteroid
+                destroyAsteroid(i);
+
                 break;
             }
         }
