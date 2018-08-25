@@ -16,16 +16,14 @@
     // Frames Per Second;
     const FPS = 30; 
     const ctx = canv.getContext("2d");
-
+    // Ship Details
     const SHIP_SIZE = 30;
-
     const SHIP = {
         x: canv.width / 2,
         y: canv.height / 2,
         r: SHIP_SIZE / 2,
         a: 90 / 180 * Math.PI // Convert to Radians
     }
-
 
      // Sets Up the Game Loop
      const update = () => {
@@ -39,21 +37,29 @@
         ctx.beginPath();
         // Nose of Ship
         ctx.moveTo(
-            SHIP.x + SHIP.r * Math.cos(SHIP.a),
-            SHIP.y - SHIP.r * Math.sin(SHIP.a),
+            SHIP.x + 4 / 3 * SHIP.r * Math.cos(SHIP.a),
+            SHIP.y - 4 / 3 * SHIP.r * Math.sin(SHIP.a),
         );
         // Rear Left
         ctx.lineTo(
-            SHIP.x - SHIP.r * (Math.cos(SHIP.a) + Math.sin(SHIP.a)),
-            SHIP.y + SHIP.r * (Math.sin(SHIP.a) - Math.cos(SHIP.a)),
+            SHIP.x - SHIP.r * (2 / 3 * Math.cos(SHIP.a) + Math.sin(SHIP.a)),
+            SHIP.y + SHIP.r * (2 / 3 * Math.sin(SHIP.a) - Math.cos(SHIP.a)),
         );
          // Rear Right
          ctx.lineTo(
-            SHIP.x - SHIP.r * (Math.cos(SHIP.a) - Math.sin(SHIP.a)),
-            SHIP.y + SHIP.r * (Math.sin(SHIP.a) + Math.cos(SHIP.a)),
+            SHIP.x - SHIP.r * (2 / 3 * Math.cos(SHIP.a) - Math.sin(SHIP.a)),
+            SHIP.y + SHIP.r * (2 / 3 * Math.sin(SHIP.a) + Math.cos(SHIP.a)),
         );
         ctx.closePath();
         ctx.stroke();
+
+        // Rotate Ship
+
+        // Move Ship
+
+        // Center Dot
+        ctx.fillStyle = "red";
+        ctx.fillRect(SHIP.x - 1,SHIP.y - 1, 2, 2);
     };
 
     setInterval(update,1000/FPS);
