@@ -4,10 +4,15 @@
 const canv = document.getElementById("gameWindow"); // Game Window
 const ctx = canv.getContext("2d");
 const FPS = 30; // Frames Per Second;
-const FRICTION = 0.7; // Friction Coefficient of Space (0 = No Friction, 1 = Lots)
+const FRICTION = 0.6; // Friction Coefficient of Space (0 = No Friction, 1 = Lots)
 const TEXT_FADE_TIME = 2.5; // Text Fade Time in Seconds
 const TEXT_SIZE = 40; // Text Font Height in Pixels
+
+// Game Details
 const GAME_LIVES = 3; // Total Game Lives
+const POINTS_LRG = 20; // Points for Hitting a Large Asteroid
+const POINTS_MED = 50; // Points for Hitting a Medium Asteroid
+const POINTS_SML = 100; // Points for Hitting a Small Asteroid
 
 // Testing Features
 const SHOW_BOUNDING = false; // Show or Hide Collision Bounding
@@ -35,7 +40,7 @@ const ROIDS_VERT = 10; // Average Number of Vertices on Each Asteroid
 const ROIDS_JAG = 0.4; // Jaggedness of Asteroids (0 = none, 1 = Lots)
 
 // Game Parameters
-let level, lives, ship, text, textAlpha;
+let level, lives, score, highScore, ship, text, textAlpha;
 let asteroids = [];
 
 newGame();
@@ -61,10 +66,20 @@ function destroyAsteroid(index) {
     if(r === Math.ceil(ROIDS_SIZE / 2)){
         asteroids.push(createAsteroid(x,y,Math.ceil(ROIDS_SIZE / 4)));
         asteroids.push(createAsteroid(x,y,Math.ceil(ROIDS_SIZE / 4)));
+        score += POINTS_LRG;
     }else if (r === Math.ceil(ROIDS_SIZE / 4)){
         asteroids.push(createAsteroid(x,y,Math.ceil(ROIDS_SIZE / 8)));
         asteroids.push(createAsteroid(x,y,Math.ceil(ROIDS_SIZE / 8))); 
+        score += POINTS_MED;
+    }else{
+        score += POINTS_SML;
     }
+
+    // Check High Score
+    if(score > highScore){
+        highScore = score;
+    }
+    // Destroys the asteroid completely
     asteroids.splice(index, 1);
 
     // If there are no more asteroids level advances
@@ -77,8 +92,8 @@ function distBetweenPoints(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
-function drawShip(x,y,a) {
-    ctx.strokeStyle = "white",
+function drawShip(x,y,a, colour = "white") {
+    ctx.strokeStyle = colour;
     ctx.lineWidth = SHIP_SIZE / 20;
     ctx.beginPath();
     // Nose of Ship
@@ -104,6 +119,11 @@ function explodeShip() {
     ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
 }
 
+function gameOver() {
+    ship.dead = true;
+    text = "Game Over";
+    textAlpha = 1.0;
+}
 function createAsteroid(x, y, r) {
     let lvlMultiplier = 1 + 0.1 * level;
     let roid = {
@@ -124,9 +144,44 @@ function createAsteroid(x, y, r) {
     return roid;
 }
 
+function drawAsteroids() {
+      // Draws Asteroids
+      ctx.lineWidth = SHIP_SIZE / 20;
+      let x, y, r, a, vert;
+  
+      for (let i = 0; i < asteroids.length; i++) {
+          ctx.strokeStyle = "slategrey";
+  
+          x = asteroids[i].x;
+          y = asteroids[i].y;
+          r = asteroids[i].r;
+          a = asteroids[i].a;
+          vert = asteroids[i].vert;
+          offs = asteroids[i].offs;
+  
+          // Draw a Path
+          ctx.beginPath();
+          ctx.moveTo(
+              x + r * offs[0] * Math.cos(a),
+              y + r * offs[0] * Math.sin(a),
+          );
+          // Draw a PolyGon
+          for (let i = 0; i < vert; i++) {
+              ctx.lineTo(
+                  x + r * offs[i] * Math.cos(a + i * Math.PI * 2 / vert),
+                  y + r * offs[i] * Math.sin(a + i * Math.PI * 2 / vert)
+              );
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+}
+
 function newGame() {
     level = 1;
     lives = GAME_LIVES;
+    score = 0;
+    highScore = 100;
     ship = newShip();
     newLevel();
 }
@@ -146,6 +201,7 @@ function newShip() {
         blinkNum: Math.ceil(SHIP_INVISIBILITY_DUR / SHIP_BLINK_DUR),
         blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS),
         canShoot: true,
+        dead: false,
         lasers: [],
         rot: 0,
         explodeTime: 0,
@@ -171,7 +227,37 @@ function shootLaser() {
     ship.canShoot = false;
 }
 
+function detectLaserHits() {
+    // Detect Laser Hits on Asteroids
+    let ax, ay, ar, lx, ly;
+    for (let i = asteroids.length - 1; i >= 0; i--) {
+        // Get Asteroid Properties
+        ax = asteroids[i].x;
+        ay = asteroids[i].y;
+        ar = asteroids[i].r;
+
+        // Loop over the lasers
+        for (let j = ship.lasers.length - 1; j >= 0; j--) {
+            lx = ship.lasers[j].x;
+            ly = ship.lasers[j].y;
+
+            // Detect Hits
+            if (ship.lasers[j].explodeTime === 0 && distBetweenPoints(ax, ay, lx, ly) < ar) {
+                // Destroy Asteroid
+                destroyAsteroid(i);
+                ship.lasers[j].explodeTime = Math.ceil(LASER_EXPLODE_DUR * FPS);
+                break;
+            }
+        }
+    }
+}
+
 const keyDown = ( /** @type {KeyboardEvent} */ ev) => {
+
+    if (ship.dead){
+        return;
+    }
+
     switch (ev.keyCode) { 
         case 32: // Space Bar (Shoots Laser)
             shootLaser();
@@ -189,6 +275,11 @@ const keyDown = ( /** @type {KeyboardEvent} */ ev) => {
 }
 
 const keyUp = ( /** @type {KeyboardEvent} */ ev) => {
+
+    if (ship.dead){
+        return;
+    }
+
     switch (ev.keyCode) {
         case 32: // Space Bar (Shoots Laser)
             ship.canShoot = true;
@@ -219,7 +310,7 @@ const update = () => {
     ctx.fillRect(0, 0, canv.width, canv.height);
 
     // Draws Ship if it isn't exploding
-    if(!exploding){   
+    if(!exploding && !ship.dead){   
             // Thrusts Ship
             if (ship.thrusting) {
                 ship.thrust.x += SHIP_THRUST * Math.cos(ship.a) / FPS;
@@ -296,35 +387,7 @@ const update = () => {
         ctx.stroke();
     }
 
-    // Draws Asteroids
-    ctx.lineWidth = SHIP_SIZE / 20;
-    let x, y, r, a, vert;
-
-    for (let i = 0; i < asteroids.length; i++) {
-        ctx.strokeStyle = "slategrey";
-
-        x = asteroids[i].x;
-        y = asteroids[i].y;
-        r = asteroids[i].r;
-        a = asteroids[i].a;
-        vert = asteroids[i].vert;
-        offs = asteroids[i].offs;
-
-        // Draw a Path
-        ctx.beginPath();
-        ctx.moveTo(
-            x + r * offs[0] * Math.cos(a),
-            y + r * offs[0] * Math.sin(a),
-        );
-        // Draw a PolyGon
-        for (let i = 0; i < vert; i++) {
-            ctx.lineTo(
-                x + r * offs[i] * Math.cos(a + i * Math.PI * 2 / vert),
-                y + r * offs[i] * Math.sin(a + i * Math.PI * 2 / vert)
-            );
-        }
-        ctx.closePath();
-        ctx.stroke();
+        drawAsteroids();
 
         // Shows Hitbox Around Asteroids 
         if (SHOW_BOUNDING) {
@@ -333,9 +396,8 @@ const update = () => {
             ctx.arc(x, y, r, 0, Math.PI * 2, false);
             ctx.stroke();
         }
-    }
-
-    if(!exploding){
+    
+    if(!exploding && !ship.dead){
         if (ship.blinkNum === 0){
             // Checks for Asteroid Collisions
             for(let i = 0; i < asteroids.length; i++){
@@ -355,10 +417,11 @@ const update = () => {
         ship.explodeTime--;
         if(ship.explodeTime === 0){
             lives--;
-            /*if (lives == 0){
+            if (lives === 0){
                 gameOver();
-            }*/
-            ship = newShip();
+            }else{
+                ship = newShip();
+            }
         }
     }
 
@@ -471,37 +534,35 @@ const update = () => {
         ctx.textBaseline = "middle";
         ctx.fillStyle = "rgba(255,255,255, " + textAlpha + ")";
         ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
-        ctx.fillText(text,canv.width/2, canv.height * 0.75);
+        ctx.fillText(text,canv.width / 2, canv.height * 0.75);
         textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);
+    }else if(ship.dead){
+        newGame();
     }
 
     // Draw Game Lives
+    let lifeColour;
     for (let i = 0; i < lives; i++){
-        drawShip(SHIP_SIZE + i * SHIP_SIZE * 1.2, SHIP_SIZE, 0.5 * Math.PI);
+        lifeColour = exploding && i === lives -1 ? "red" : "white";
+        drawShip(SHIP_SIZE + i * SHIP_SIZE * 1.2, SHIP_SIZE, 0.5 * Math.PI, lifeColour);
     }
 
-    // Detect Laser Hits on Asteroids
-    let ax,ay,ar,lx,ly;
-    for(let i = asteroids.length -1; i >= 0; i--){
-        // Get Asteroid Properties
-        ax = asteroids[i].x;
-        ay = asteroids[i].y;
-        ar = asteroids[i].r;
+    // Draw Game Score
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "white";
+    ctx.font = TEXT_SIZE + "px dejavu sans mono";
+    ctx.fillText(score,canv.width - SHIP_SIZE / 2, SHIP_SIZE);
+    
+    // Draw High Score
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "white";
+    ctx.font = (TEXT_SIZE * 0.75) + "px dejavu sans mono";
+    ctx.fillText(highScore, canv.width / 2, SHIP_SIZE);
 
-        // Loop over the lasers
-        for(let j = ship.lasers.length - 1; j >= 0; j--){
-            lx = ship.lasers[j].x;
-            ly = ship.lasers[j].y;
-
-            // Detect Hits
-            if(ship.lasers[j].explodeTime === 0 && distBetweenPoints(ax,ay,lx,ly) < ar){ 
-                // Destroy Asteroid
-                destroyAsteroid(i);
-                ship.lasers[j].explodeTime = Math.ceil(LASER_EXPLODE_DUR * FPS);
-                break;
-            }
-        }
-    }
+    // Checks to see if the laser hit anything
+    detectLaserHits();
 };// End update 
 
 // Game Loop
