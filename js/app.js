@@ -13,6 +13,10 @@ const SHIP_THRUST = 5; // Acceleration of Ship in Pixels Per Second
 const SHIP_EXPLODE_DUR = 0.3; // Duration of Ships Explosion
 const SHIP_INVISIBILITY_DUR = 3; // Duration of Ships Invisibility
 const SHIP_BLINK_DUR = 0.1; // Duration of Ships Blinking During Invisibility
+
+// Laser Details
+const LASER_MAX = 10; // Max Number of laser beams on screen at once
+const LASER_SPD = 500; // Speed of Lasers
 // Astroid Details
 const NUM_ROIDS = 3; // Starting number of astroids
 const ROIDS_SIZE = 100; // Starting size of astroids in Pixels
@@ -82,6 +86,8 @@ function newShip() {
         a: 90 / 180 * Math.PI, // Convert to Radians
         blinkNum: Math.ceil(SHIP_INVISIBILITY_DUR / SHIP_BLINK_DUR),
         blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS),
+        canShoot: true,
+        lasers: [],
         rot: 0,
         explodeTime: 0,
         thrusting: false,
@@ -91,8 +97,24 @@ function newShip() {
         }
     }
 }
+
+function shootLaser() {
+    if(SHIP.canShoot && SHIP.lasers.length < LASER_MAX){
+        SHIP.lasers.push({
+            x: SHIP.x + 4 / 3 * SHIP.r * Math.cos(SHIP.a),
+            y: SHIP.y - 4 / 3 * SHIP.r * Math.sin(SHIP.a),
+            xv: LASER_SPD * Math.cos(SHIP.a) / FPS,
+            yv: -LASER_SPD * Math.sin(SHIP.a) / FPS
+        });
+    }
+    SHIP.canShoot = false;
+}
+
 const keyDown = ( /** @type {KeyboardEvent} */ ev) => {
-    switch (ev.keyCode) {
+    switch (ev.keyCode) { 
+        case 32: // Space Bar (Shoots Laser)
+            shootLaser();
+            break;
         case 37: // Left Arrow (Rotates Ship Left)
             SHIP.rot = TURN_SPEED / 180 * Math.PI / FPS;
             break;
@@ -107,6 +129,9 @@ const keyDown = ( /** @type {KeyboardEvent} */ ev) => {
 
 const keyUp = ( /** @type {KeyboardEvent} */ ev) => {
     switch (ev.keyCode) {
+        case 32: // Space Bar (Shoots Laser)
+            SHIP.canShoot = true;
+            break;
         case 37: // Left Arrow (Stops Left Rotation)
             SHIP.rot = 0;
             break;
@@ -286,12 +311,10 @@ const update = () => {
         SHIP.y += SHIP.thrust.y;
     }else {
         SHIP.explodeTime--;
-
         if(SHIP.explodeTime === 0){
             SHIP = newShip();
         }
     }
-
 
     // Handle Screen Boundaries
     // X Coordinates
@@ -307,8 +330,28 @@ const update = () => {
         SHIP.y = 0 - SHIP.r;
     }
 
+    // Moves Lasers
+    for (let i = 0; i < SHIP.lasers.length; i++){
+        SHIP.lasers[i].x += SHIP.lasers[i].xv;
+        SHIP.lasers[i].y += SHIP.lasers[i].yv;
+
+        // Handle Edge of Screen
+        // X Coords
+        if(SHIP.lasers[i].x < 0){
+            SHIP.lasers[i].x = canv.width;
+        }else if(SHIP.lasers[i].x > canv.width){
+            SHIP.lasers[i].x = 0;
+        }
+        // Y Coords
+        if(SHIP.lasers[i].y < 0){
+            SHIP.lasers[i].y = canv.height;
+        }else if(SHIP.lasers[i].y > canv.height){
+            SHIP.lasers[i].y = 0;
+        }
+    }
+
+    // Move Asteroids
     for(let i = 0; i < asteroids.length; i++){
-        // Move Asteroid
         asteroids[i].x += asteroids[i].xv;
         asteroids[i].y += asteroids[i].yv;
         // Handle Edge of Screen
@@ -333,6 +376,13 @@ const update = () => {
         ctx.fillRect(SHIP.x - 1, SHIP.y - 1, 2, 2);
     }
 
+    // Draws Lasers
+    for (let i = 0; i < SHIP.lasers.length; i++){
+        ctx.fillStyle = "salmon";
+        ctx.beginPath();
+        ctx.arc(SHIP.lasers[i].x,SHIP.lasers[i].y, SHIP_SIZE / 15, 0, Math.PI * 2, false);
+        ctx.fill();
+    }
 
 };
 
