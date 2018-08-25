@@ -5,6 +5,8 @@ const canv = document.getElementById("gameWindow"); // Game Window
 const ctx = canv.getContext("2d");
 const FPS = 30; // Frames Per Second;
 const FRICTION = 0.7; // Friction Coefficient of Space (0 = No Friction, 1 = Lots)
+const TEXT_FADE_TIME = 2.5; // Text Fade Time in Seconds
+const TEXT_SIZE = 40; // Text Font Height in Pixels
 
 // Testing Features
 const SHOW_BOUNDING = false; // Show or Hide Collision Bounding
@@ -99,12 +101,14 @@ function createAsteroid(x, y, r) {
 }
 
 function newGame() {
-    level = 0;
+    level = 1;
     ship = newShip();
     newLevel();
 }
 
 function newLevel() {
+    text = `Level ${level}`;
+    textAlpha = 1.0;
     createAsteroidBelt();
 }
 
@@ -451,6 +455,15 @@ const update = () => {
         }
     }
 
+    // Draw Game Text
+    if(textAlpha >= 0){
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(255,255,255, " + textAlpha + ")";
+        ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
+        ctx.fillText(text,canv.width/2, canv.height * 0.75);
+        textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);
+    }
     // Detect Laser Hits on Asteroids
     let ax,ay,ar,lx,ly;
     for(let i = asteroids.length -1; i >= 0; i--){
