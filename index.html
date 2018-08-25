@@ -15,6 +15,7 @@
     const canv = document.getElementById("gameWindow");
     // Frames Per Second;
     const FPS = 30; 
+    const FRICTION = 0.7; // Friction Coefficient of Space (0 = No Friction, 1 = Lots)
     const ctx = canv.getContext("2d");
     // Ship Details
     const SHIP_SIZE = 30; // Height In Pixels
@@ -75,7 +76,11 @@
         if (SHIP.thrusting){
             SHIP.thrust.x += SHIP_THRUST * Math.cos(SHIP.a) / FPS;
             SHIP.thrust.y -= SHIP_THRUST * Math.sin(SHIP.a) / FPS;
+        }else{
+            SHIP.thrust.x -= FRICTION * SHIP.thrust.x / FPS;
+            SHIP.thrust.y -= FRICTION * SHIP.thrust.y / FPS;
         }
+        
         // Draws Ship
         ctx.strokeStyle = "white",
         ctx.lineWidth = SHIP_SIZE / 20;
