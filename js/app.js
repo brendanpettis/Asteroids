@@ -14,7 +14,7 @@
     const ROIDS_SIZE = 100; // Starting size of astroids in Pixels
     const ROIDS_SPD = 50; // Starting Speed in Pixels Per Second
     const ROIDS_VERT = 10; // Average Number of Vertices on Each Asteroid
-
+    const ROIDS_JAG = 0.4; // Jaggedness of Asteroids (0 = none, 1 = Lots)
     // Canvas Details
     const canv = document.getElementById("gameWindow"); // Game Window
     const ctx = canv.getContext("2d");
@@ -60,9 +60,17 @@
             r: ROIDS_SIZE / 2,
             a: Math.random() * Math.PI * 2,
             vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT / 2),
+            offs: []
         };
+
+        // Creates vertex offsets array
+        for(let i = 0; i < ROIDS_VERT; i++){
+            roid.offs.push(Math.random() * ROIDS_JAG * 2 + 1 - ROIDS_JAG);
+        }
+
         return roid;
     }
+
     const keyDown = (/** @type {KeyboardEvent} */ ev) => {
         switch(ev.keyCode){
             case 37: // Left Arrow (Rotates Ship Left)
@@ -169,18 +177,19 @@
             r = asteroids[i].r;
             a = asteroids[i].a;
             vert = asteroids[i].vert;
+            offs = asteroids[i].offs;
 
             // Draw a Path
             ctx.beginPath();
             ctx.moveTo(
-                x + r * Math.cos(a),
-                y + r * Math.sin(a),
+                x + r * offs[0] * Math.cos(a),
+                y + r * offs[0] * Math.sin(a),
             );
             // Draw a PolyGon
             for (let i = 0; i < vert; i++){
                 ctx.lineTo(
-                    x + r * Math.cos(a + i * Math.PI * 2 / vert),
-                    y + r * Math.sin(a + i * Math.PI * 2 / vert)
+                    x + r * offs[i] * Math.cos(a + i * Math.PI * 2 / vert),
+                    y + r * offs[i] * Math.sin(a + i * Math.PI * 2 / vert)
                 );
             }
             ctx.closePath();
