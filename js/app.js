@@ -21,7 +21,7 @@ const SHIP_BLINK_DUR = 0.1; // Duration of Ships Blinking During Invisibility
 // Laser Details
 const LASER_MAX = 10; // Max Number of laser beams on screen at once
 const LASER_SPD = 500; // Speed of Lasers
-const LASER_DIST = 0.5; // Max Distance Laser Can Travel as Fraction of Screen
+const LASER_DIST = 0.4; // Max Distance Laser Can Travel as Fraction of Screen
 
 // Astroid Details
 const NUM_ROIDS = 3; // Starting number of astroids
@@ -387,6 +387,31 @@ const update = () => {
         ctx.beginPath();
         ctx.arc(SHIP.lasers[i].x,SHIP.lasers[i].y, SHIP_SIZE / 15, 0, Math.PI * 2, false);
         ctx.fill();
+    }
+
+    // Detect Laser Hits on Asteroids
+    let ax,ay,ar,lx,ly;
+    for(let i = asteroids.length -1; i >= 0; i--){
+        // Get Asteroid Properties
+        ax = asteroids[i].x;
+        ay = asteroids[i].y;
+        ar = asteroids[i].r;
+
+        // Loop over the lasers
+        for(let j = SHIP.lasers.length - 1; j >= 0; j--){
+            lx = SHIP.lasers[j].x;
+            ly = SHIP.lasers[j].y;
+
+            // Detect Hits
+            if(distBetweenPoints(ax,ay,lx,ly) < ar){
+                // Remove Laser
+                SHIP.lasers.splice(j,1);
+
+                // Remove Asteroid
+                asteroids.splice(i,1);
+                break;
+            }
+        }
     }
 };// End update 
 
