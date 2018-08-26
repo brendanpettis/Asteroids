@@ -7,25 +7,7 @@
     <title>Asteroids</title>
 </head>
 <body>
-    <canvas id="gameWindow" width="760" height="570"></canvas>  
-    <button onClick="playMusic()" id="musicBtn">Play Music</button>
-    <script>
-        function playMusic(){       
-            let x = document.getElementById("musicBtn");
-                if (x.style.display === "none") {
-                    x.style.display = "block";
-                } else {
-                    x.style.display = "none";
-                }   
-            let music = new Audio("sounds/space.wav",1);
-            music.addEventListener('ended', function () {
-                this.currentTime = 0;
-                this.play();
-            }, false);
-            music.play();
-            document.getElementById("gameWindow").focus();
-        }
-    </script>
+    <canvas id="gameWindow" width="760" height="570"></canvas>
     <script src="js/app.js"></script>
 </body>
 </html>

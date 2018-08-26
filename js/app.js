@@ -8,6 +8,7 @@ const FRICTION = 0.6; // Friction Coefficient of Space (0 = No Friction, 1 = Lot
 const TEXT_FADE_TIME = 2.5; // Text Fade Time in Seconds
 const TEXT_SIZE = 40; // Text Font Height in Pixels
 const SAVE_KEY_SCORE = "highscore"; // Save Key for Local Storage
+let permission = false; // Flag to Begin Game
 
 // Game Details
 const GAME_LIVES = 3; // Total Game Lives
@@ -52,6 +53,34 @@ let level, lives, score, highScore, ship, text, textAlpha, asteroids;
 
 newGame();
 
+function displayInstructions() {
+    let instructions = "Instructions";
+    let moveInstructions = "Arrow Keys to Move : \u21E1 \u21E3 \u21E0 \u21E2";
+    let shootInstructions = "Space Bar to Shoot";
+    let playInstructions = "Press Enter To Play";
+    let tempAlpha = 4.0;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgba(255,255,255, " + tempAlpha + ")";
+    ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
+    ctx.fillText(instructions, canv.width / 2, canv.height * 0.2);
+    ctx.font = "small-caps " + (TEXT_SIZE - 10) + "px dejavu sans mono";
+    ctx.fillText(moveInstructions, canv.width / 2, canv.height * 0.4);
+    ctx.fillText(shootInstructions, canv.width / 2, canv.height * 0.5);
+    ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
+    ctx.fillText(playInstructions, canv.width / 2, canv.height * 0.7);
+    textAlpha -= 1.0;
+}
+
+function playBackroundMusic() {
+    let music = new Audio("sounds/space.wav",1);
+    music.addEventListener('ended', function () {
+        this.currentTime = 0;
+        this.play();
+    }, false);
+    music.play();
+}
 function createAsteroidBelt() {
     asteroids = [];
     let x, y;
@@ -303,6 +332,10 @@ const keyDown = ( /** @type {KeyboardEvent} */ ev) => {
     }
 
     switch (ev.keyCode) {
+        case 13:// Enter Key was Hit
+        permission = true;
+        playBackroundMusic();
+        break;
         case 32: // Space Bar (Shoots Laser)
             shootLaser();
             break;
@@ -354,6 +387,10 @@ const update = () => {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canv.width, canv.height);
 
+    if(!permission){
+        displayInstructions();
+    }
+    else{
     // Draws Ship if it isn't exploding
     if (!exploding && !ship.dead) {
         // Thrusts Ship
@@ -612,8 +649,7 @@ const update = () => {
     ctx.fillText("BEST: " + highScore, canv.width / 2, SHIP_SIZE);
     // Checks to see if the laser hit anything
     detectLaserHits();
+    }
 };// End update 
 
 setInterval(update, 1000 / FPS);
-
-
