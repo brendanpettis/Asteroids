@@ -71,6 +71,8 @@ function displayInstructions() {
     ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
     ctx.fillText(playInstructions, canv.width / 2, canv.height * 0.7);
     textAlpha -= 1.0;
+
+    newGame();
 }
 
 function playBackroundMusic() {
