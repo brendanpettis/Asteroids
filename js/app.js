@@ -43,10 +43,10 @@ const ROIDS_JAG = 0.4; // Jaggedness of Asteroids (0 = none, 1 = Lots)
 
 // Sound Effects
 const SOUND_ON = true; // Turns Sound On or Off
-const fxLaser = new Sound("sounds/laser.m4a", 5, 0.5); // Sound for the Laser Firing
-const fxExplode = new Sound("sounds/explode.m4a"); // Sound for the Ship Exploding
-const fxHit = new Sound("sounds/hit.m4a", 5); // Sound for the Laser hitting an Asteroid
-const fxThrust = new Sound("sounds/thrust.m4a"); // Sound for Ship Thruster
+const fxLaser = new Sound("sounds/laser.m4a", 5, 0.1); // Sound for the Laser Firing
+const fxExplode = new Sound("sounds/explode.m4a", 1, 0.5); // Sound for the Ship Exploding
+const fxHit = new Sound("sounds/hit.m4a", 5, 0.5); // Sound for the Laser hitting an Asteroid
+const fxThrust = new Sound("sounds/thrust.m4a",1, 0.3); // Sound for Ship Thruster
 
 // Game Parameters
 let level, lives, score, highScore, ship, text, textAlpha, asteroids;
