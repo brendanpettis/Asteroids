@@ -55,20 +55,21 @@ newGame();
 
 function displayInstructions() {
     let instructions = "Instructions";
-    let moveInstructions = "Arrow Keys to Move : \u21E1 \u21E3 \u21E0 \u21E2";
-    let shootInstructions = "Space Bar to Shoot";
-    let playInstructions = "Press Enter To Play";
+    let moveInstructions = "[ \u21E1 ] [\u21E0] [\u21E2]  Keys to Move";
+    let shootInstructions = "[Space Bar] to Shoot";
+    let playInstructions = "Press [Enter] to Play";
     let tempAlpha = 4.0;
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(255,255,255, " + tempAlpha + ")";
+    ctx.fillStyle = "rgba(255,255,0, " + tempAlpha + ")";
     ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
     ctx.fillText(instructions, canv.width / 2, canv.height * 0.2);
+    ctx.fillStyle = "rgba(255,255,255, " + tempAlpha + ")";
     ctx.font = "small-caps " + (TEXT_SIZE - 10) + "px dejavu sans mono";
     ctx.fillText(moveInstructions, canv.width / 2, canv.height * 0.4);
     ctx.fillText(shootInstructions, canv.width / 2, canv.height * 0.5);
-    ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
+    ctx.fillStyle = "rgba(0,255,0, " + tempAlpha + ")";
     ctx.fillText(playInstructions, canv.width / 2, canv.height * 0.7);
     textAlpha -= 1.0;
 
