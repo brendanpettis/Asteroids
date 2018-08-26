@@ -51,6 +51,7 @@ const fxThrust = new Sound("sounds/thrust.m4a"); // Sound for Ship Thruster
 // Game Parameters
 let level, lives, score, highScore, ship, text, textAlpha, asteroids;
 
+// Starts a New Game
 newGame();
 
 function displayInstructions() {
@@ -72,7 +73,7 @@ function displayInstructions() {
     ctx.fillStyle = "rgba(0,255,0, " + tempAlpha + ")";
     ctx.fillText(playInstructions, canv.width / 2, canv.height * 0.7);
     textAlpha -= 1.0;
-
+    // Needs to be Reset for Level to Display Properly
     newGame();
 }
 
@@ -84,6 +85,7 @@ function playBackroundMusic() {
     }, false);
     music.play();
 }
+
 function createAsteroidBelt() {
     asteroids = [];
     let x, y;
