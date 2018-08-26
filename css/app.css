@@ -1,0 +1,16 @@
+/* TO DO Make Game Responsive */
+
+.wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 20px;
+    grid-auto-rows: 300px;
+    grid-template-areas: 
+      ". a a ."
+      ". a a .";
+  }
+  .item {
+    grid-area: a;
+    align-self: center;
+    justify-self: center;
+  }
