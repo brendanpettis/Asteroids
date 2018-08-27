@@ -1,16 +1,23 @@
 /* TO DO Make Game Responsive */
 
+body {
+  height: 100vh;
+  background: #0F2027;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to top, #2C5364, #203A43, #0F2027);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to top, #2C5364, #203A43, #0F2027); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background-repeat: no-repeat;  
+}
+
 .wrapper {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-gap: 20px;
-    grid-auto-rows: 300px;
-    grid-template-areas: 
-      ". a a ."
-      ". a a .";
-  }
-  .item {
-    grid-area: a;
-    align-self: center;
-    justify-self: center;
-  }
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 20px;
+  grid-auto-rows: 300px;
+  grid-template-areas: ". a a ." ". a a .";
+}
+
+.item {
+  grid-area: a;
+  align-self: center;
+  justify-self: center;
+}
