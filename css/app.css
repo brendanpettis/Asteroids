@@ -1,5 +1,9 @@
 /* TO DO Make Game Responsive */
 
+body {
+  background-image: url("space.jpg");
+}
+
 .wrapper {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
